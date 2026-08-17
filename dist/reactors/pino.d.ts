@@ -9,7 +9,7 @@ interface PinoReporterOptions {
     logger: PinoLogger;
 }
 /**
- * Wires loop-guard snapshots into a pino logger.
+ * Wires loopwarden snapshots into a pino logger.
  *
  * Requires `pino` as a peer dependency — not bundled.
  */

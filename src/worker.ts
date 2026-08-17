@@ -3,7 +3,7 @@ import type { Worker } from 'node:worker_threads';
 import { watchEventLoop, type WatchOptions, type WatchHandle } from './core/watch.js';
 import type { AlertLevel, LoopSnapshot } from './core/types.js';
 
-const CHANNEL = '__loopGuard' as const;
+const CHANNEL = '__loopwarden' as const;
 
 type WireMessage =
   | { channel: typeof CHANNEL; kind: 'log'; snapshot: LoopSnapshot }
@@ -19,7 +19,7 @@ export type WorkerWatchOptions = Omit<WatchOptions, 'onLog' | 'onThreshold' | 'o
  */
 export function reportEventLoopToParent(opts: WorkerWatchOptions = {}): WatchHandle {
   if (!parentPort) {
-    throw new Error('loop-guard: reportEventLoopToParent() must be called inside a worker_thread');
+    throw new Error('loopwarden: reportEventLoopToParent() must be called inside a worker_thread');
   }
   const port = parentPort;
 

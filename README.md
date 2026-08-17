@@ -1,9 +1,8 @@
-# loop-guard
+# loopwarden
 
-[![npm](https://img.shields.io/npm/v/loop-guard)](https://www.npmjs.com/package/loop-guard)
-[![license](https://img.shields.io/npm/l/loop-guard)](LICENSE)
-[![node](https://img.shields.io/node/v/loop-guard)](package.json)
-[![npm downloads](https://img.shields.io/npm/dm/loop-guard)](https://www.npmjs.com/package/loop-guard)
+[![npm](https://img.shields.io/npm/v/loopwarden)](https://www.npmjs.com/package/loopwarden)
+[![license](https://img.shields.io/npm/l/loopwarden)](LICENSE)
+[![node](https://img.shields.io/node/v/loopwarden)](package.json)
 [![types](https://img.shields.io/badge/types-TypeScript-blue)](src/core/types.ts)
 
 Native Node.js event-loop lag monitoring using `perf_hooks.monitorEventLoopDelay` —
@@ -14,7 +13,7 @@ dependencies; exporters are optional peer deps loaded only if you use them.
 ## Why not toobusy-js / event-loop-lag?
 
 Those libraries poll the event loop with `setInterval` and expose a single
-lag number. `loop-guard` uses Node's native histogram API instead (lower
+lag number. `loopwarden` uses Node's native histogram API instead (lower
 overhead, no self-induced polling noise), exposes p50/p95/p99/max instead of
 one number, ships with TypeScript types and dual ESM/CJS output, and has
 first-class worker_thread support so you can tell *which* thread degraded.
@@ -22,13 +21,13 @@ first-class worker_thread support so you can tell *which* thread degraded.
 ## Install
 
 ```
-npm install loop-guard
+npm install loopwarden
 ```
 
 ## Quick start
 
 ```ts
-import { watchEventLoop } from 'loop-guard';
+import { watchEventLoop } from 'loopwarden';
 
 const handle = watchEventLoop({
   intervalMs: 1000,
@@ -48,13 +47,13 @@ handle.stop();
 
 ```ts
 // inside your worker file
-import { reportEventLoopToParent } from 'loop-guard/worker';
+import { reportEventLoopToParent } from 'loopwarden/worker';
 reportEventLoopToParent({ source: 'auth-controller', warn: { ms: 50 } });
 ```
 
 ```ts
 // on the main thread
-import { pipeFromWorker } from 'loop-guard/worker';
+import { pipeFromWorker } from 'loopwarden/worker';
 pipeFromWorker(worker, {
   onLog: (s) => logger.info(s),
   onThreshold: (s, level) => alerting.notify(level, s),
@@ -64,7 +63,7 @@ pipeFromWorker(worker, {
 ## Console reporter (zero dependencies)
 
 ```ts
-import { watchEventLoop, consoleReporter } from 'loop-guard';
+import { watchEventLoop, consoleReporter } from 'loopwarden';
 
 watchEventLoop({
   warn: { ms: 50 },
@@ -78,19 +77,19 @@ watchEventLoop({
 Output looks like:
 
 ```
-[loop-guard] main p50=2.1ms p95=8.4ms p99=12.3ms max=17.3ms
-[loop-guard] WARN threshold breached — main p50=… p99=80.0ms max=85.0ms
-[loop-guard] CRITICAL threshold breached — main p50=… p99=200.0ms max=205.0ms
-[loop-guard] recovered from warn — main p50=… p99=9.0ms max=14.0ms
+[loopwarden] main p50=2.1ms p95=8.4ms p99=12.3ms max=17.3ms
+[loopwarden] WARN threshold breached — main p50=… p99=80.0ms max=85.0ms
+[loopwarden] CRITICAL threshold breached — main p50=… p99=200.0ms max=205.0ms
+[loopwarden] recovered from warn — main p50=… p99=9.0ms max=14.0ms
 ```
 
 ## Exporters
 
 ```ts
-import { PrometheusReporter } from 'loop-guard/prometheus';
-import { SentryReporter } from 'loop-guard/sentry';
-import { OtelReporter } from 'loop-guard/otel';
-import { PinoReporter } from 'loop-guard/pino';
+import { PrometheusReporter } from 'loopwarden/prometheus';
+import { SentryReporter } from 'loopwarden/sentry';
+import { OtelReporter } from 'loopwarden/otel';
+import { PinoReporter } from 'loopwarden/pino';
 ```
 
 Each requires its corresponding peer dependency (`prom-client`,
@@ -100,8 +99,8 @@ Each requires its corresponding peer dependency (`prom-client`,
 
 ```ts
 import pino from 'pino';
-import { watchEventLoop } from 'loop-guard';
-import { PinoReporter } from 'loop-guard/pino';
+import { watchEventLoop } from 'loopwarden';
+import { PinoReporter } from 'loopwarden/pino';
 
 const logger = pino();
 const reporter = new PinoReporter({ logger });
@@ -122,7 +121,7 @@ fields alongside the message.
 ## Request correlation
 
 ```ts
-import { withTraceId, getCurrentTrace } from 'loop-guard';
+import { withTraceId, getCurrentTrace } from 'loopwarden';
 
 app.use((req, res, next) => withTraceId(req.id, 'http-controller', () => next()));
 ```

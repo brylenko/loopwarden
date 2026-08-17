@@ -12,7 +12,7 @@ export interface PinoReporterOptions {
 }
 
 /**
- * Wires loop-guard snapshots into a pino logger.
+ * Wires loopwarden snapshots into a pino logger.
  *
  * Requires `pino` as a peer dependency — not bundled.
  */
@@ -26,7 +26,7 @@ export class PinoReporter {
   onLog = (snapshot: LoopSnapshot): void => {
     this.#logger.info(
       { source: snapshot.source, p50: snapshot.p50, p95: snapshot.p95, p99: snapshot.p99, max: snapshot.max },
-      `[loop-guard] ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`,
+      `[loopwarden] ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`,
     );
   };
 
@@ -39,7 +39,7 @@ export class PinoReporter {
       max: snapshot.max,
       ...(snapshot.traceId !== undefined ? { traceId: snapshot.traceId } : {}),
     };
-    const msg = `[loop-guard] ${level.toUpperCase()} ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`;
+    const msg = `[loopwarden] ${level.toUpperCase()} ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`;
     if (level === 'critical') {
       this.#logger.error(data, msg);
     } else {
@@ -50,7 +50,7 @@ export class PinoReporter {
   onRecover = (snapshot: LoopSnapshot, level: AlertLevel): void => {
     this.#logger.info(
       { source: snapshot.source, alertLevel: level, p99: snapshot.p99.toFixed(1) },
-      `[loop-guard] recovered from ${level} on ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`,
+      `[loopwarden] recovered from ${level} on ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`,
     );
   };
 }

@@ -7,7 +7,7 @@ interface SentryReporterOptions {
     captureAtLevel?: AlertLevel;
 }
 /**
- * Wires loop-guard into Sentry: always leaves a breadcrumb on every tick's
+ * Wires loopwarden into Sentry: always leaves a breadcrumb on every tick's
  * threshold state, and calls captureMessage only at `captureAtLevel` so you
  * don't spam Sentry on every sample.
  *

@@ -83,7 +83,7 @@ function watchEventLoop(opts) {
           state.lastFiredAt = now;
           const alertSnapshot = { ...snapshot };
           if (captureStack) {
-            const stack = new Error(`loop-guard: ${level} threshold breached`).stack;
+            const stack = new Error(`loopwarden: ${level} threshold breached`).stack;
             if (stack !== void 0) alertSnapshot.stack = stack;
           }
           opts.onThreshold?.(alertSnapshot, level);
@@ -112,11 +112,11 @@ function fmt(snapshot) {
 }
 var consoleReporter = {
   onLog(snapshot) {
-    console.log(`[loop-guard] ${fmt(snapshot)}`);
+    console.log(`[loopwarden] ${fmt(snapshot)}`);
   },
   onThreshold(snapshot, level) {
     const prefix = level === "critical" ? "CRITICAL" : "WARN";
-    const msg = `[loop-guard] ${prefix} threshold breached \u2014 ${fmt(snapshot)}`;
+    const msg = `[loopwarden] ${prefix} threshold breached \u2014 ${fmt(snapshot)}`;
     if (level === "critical") {
       console.error(msg);
     } else {
@@ -124,7 +124,7 @@ var consoleReporter = {
     }
   },
   onRecover(snapshot, level) {
-    console.log(`[loop-guard] recovered from ${level} \u2014 ${fmt(snapshot)}`);
+    console.log(`[loopwarden] recovered from ${level} \u2014 ${fmt(snapshot)}`);
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

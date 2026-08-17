@@ -142,7 +142,7 @@ describe('watchEventLoop — thresholds and debounce', () => {
     handle.stop();
     assert.ok(capturedSnapshot !== undefined);
     assert.strictEqual(typeof capturedSnapshot.stack, 'string');
-    assert.ok(capturedSnapshot.stack!.includes('loop-guard'));
+    assert.ok(capturedSnapshot.stack!.includes('loopwarden'));
   });
 
   it('does not include stack when captureStackOnThreshold=false', async () => {

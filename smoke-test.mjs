@@ -53,7 +53,7 @@ console.error = origError;
 for (const e of logs) origLog(`  [${e.level}] ${e.msg}`);
 
 assert('onLog uses console.log', logs[0]?.level === 'log');
-assert('onLog contains [loop-guard]', logs[0]?.msg.includes('[loop-guard]'));
+assert('onLog contains [loopwarden]', logs[0]?.msg.includes('[loopwarden]'));
 assert('onLog contains p99=', logs[0]?.msg.includes('p99='));
 assert('onThreshold warn uses console.warn', logs[1]?.level === 'warn');
 assert('onThreshold warn contains WARN', logs[1]?.msg.includes('WARN'));

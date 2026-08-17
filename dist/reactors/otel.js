@@ -3,7 +3,7 @@ import { metrics } from "@opentelemetry/api";
 var OtelReporter = class {
   #histogram;
   constructor(opts = {}) {
-    const meter = metrics.getMeter(opts.meterName ?? "loop-guard");
+    const meter = metrics.getMeter(opts.meterName ?? "loopwarden");
     this.#histogram = meter.createHistogram("event_loop_lag_ms", {
       description: "Node.js event loop lag in milliseconds",
       unit: "ms"

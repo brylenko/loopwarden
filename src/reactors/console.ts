@@ -12,12 +12,12 @@ function fmt(snapshot: LoopSnapshot): string {
  */
 export const consoleReporter = {
   onLog(snapshot: LoopSnapshot): void {
-    console.log(`[loop-guard] ${fmt(snapshot)}`);
+    console.log(`[loopwarden] ${fmt(snapshot)}`);
   },
 
   onThreshold(snapshot: LoopSnapshot, level: AlertLevel): void {
     const prefix = level === 'critical' ? 'CRITICAL' : 'WARN';
-    const msg = `[loop-guard] ${prefix} threshold breached — ${fmt(snapshot)}`;
+    const msg = `[loopwarden] ${prefix} threshold breached — ${fmt(snapshot)}`;
     if (level === 'critical') {
       console.error(msg);
     } else {
@@ -26,6 +26,6 @@ export const consoleReporter = {
   },
 
   onRecover(snapshot: LoopSnapshot, level: AlertLevel): void {
-    console.log(`[loop-guard] recovered from ${level} — ${fmt(snapshot)}`);
+    console.log(`[loopwarden] recovered from ${level} — ${fmt(snapshot)}`);
   },
 };

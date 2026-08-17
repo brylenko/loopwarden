@@ -4,7 +4,7 @@ interface OtelReporterOptions {
     meterName?: string;
 }
 /**
- * Records loop-guard snapshots as an OpenTelemetry histogram, for teams
+ * Records loopwarden snapshots as an OpenTelemetry histogram, for teams
  * already on an OTel pipeline into Grafana Cloud / Tempo / Mimir instead
  * of a plain Prometheus scrape target.
  *

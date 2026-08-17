@@ -1,7 +1,7 @@
 {
-  "name": "loop-guard",
+  "name": "loopwarden",
   "version": "0.1.0",
-  "description": "Native event-loop lag monitoring for Node.js with percentile-based metrics, debounced two-level alerts, worker_thread support, and pluggable exporters (Prometheus, Sentry, OpenTelemetry, Pino).",
+  "description": "Native Node.js event-loop lag monitoring with percentile histograms, debounced two-level alerts, worker_thread support, and pluggable exporters (Prometheus, Sentry, OpenTelemetry).",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

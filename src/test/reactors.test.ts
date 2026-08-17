@@ -59,9 +59,9 @@ describe('consoleReporter.onLog', () => {
     assert.strictEqual(lines.length, 1);
   });
 
-  it('output contains [loop-guard] prefix', () => {
+  it('output contains [loopwarden] prefix', () => {
     const lines = captureConsole('log', () => consoleReporter.onLog(makeSnap()));
-    assert.ok(lines[0]?.includes('[loop-guard]'));
+    assert.ok(lines[0]?.includes('[loopwarden]'));
   });
 
   it('output contains source name', () => {

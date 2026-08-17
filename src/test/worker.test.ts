@@ -42,7 +42,7 @@ describe('pipeFromWorker', () => {
   });
 
   it('ignores messages from unrelated protocols', async () => {
-    // Worker that sends an unrelated message first, then a real loop-guard one.
+    // Worker that sends an unrelated message first, then a real loopwarden one.
     const workerCode = `
       import { parentPort } from 'node:worker_threads';
       import { reportEventLoopToParent } from ${JSON.stringify(new URL('../worker.js', import.meta.url).href)};
@@ -64,7 +64,7 @@ describe('pipeFromWorker', () => {
     });
 
     assert.ok(rawMessages.length >= 2, 'expected at least 2 raw messages');
-    // Only loop-guard messages should reach onLog
+    // Only loopwarden messages should reach onLog
     assert.ok(snapshots.every((s) => s.source === 'filter-test'));
   });
 

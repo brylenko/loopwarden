@@ -53,7 +53,7 @@ function watchEventLoop(opts) {
           state.lastFiredAt = now;
           const alertSnapshot = { ...snapshot };
           if (captureStack) {
-            const stack = new Error(`loop-guard: ${level} threshold breached`).stack;
+            const stack = new Error(`loopwarden: ${level} threshold breached`).stack;
             if (stack !== void 0) alertSnapshot.stack = stack;
           }
           opts.onThreshold?.(alertSnapshot, level);
@@ -77,10 +77,10 @@ function nsToMs(ns) {
 }
 
 // src/worker.ts
-var CHANNEL = "__loopGuard";
+var CHANNEL = "__loopwarden";
 function reportEventLoopToParent(opts = {}) {
   if (!parentPort) {
-    throw new Error("loop-guard: reportEventLoopToParent() must be called inside a worker_thread");
+    throw new Error("loopwarden: reportEventLoopToParent() must be called inside a worker_thread");
   }
   const port = parentPort;
   return watchEventLoop({

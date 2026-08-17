@@ -6,7 +6,7 @@ export interface OtelReporterOptions {
 }
 
 /**
- * Records loop-guard snapshots as an OpenTelemetry histogram, for teams
+ * Records loopwarden snapshots as an OpenTelemetry histogram, for teams
  * already on an OTel pipeline into Grafana Cloud / Tempo / Mimir instead
  * of a plain Prometheus scrape target.
  *
@@ -16,7 +16,7 @@ export class OtelReporter {
   #histogram: Histogram;
 
   constructor(opts: OtelReporterOptions = {}) {
-    const meter = metrics.getMeter(opts.meterName ?? 'loop-guard');
+    const meter = metrics.getMeter(opts.meterName ?? 'loopwarden');
     this.#histogram = meter.createHistogram('event_loop_lag_ms', {
       description: 'Node.js event loop lag in milliseconds',
       unit: 'ms',

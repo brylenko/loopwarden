@@ -7,7 +7,7 @@ export interface PrometheusReporterOptions {
 }
 
 /**
- * Wires loop-guard snapshots into prom-client gauges, labeled by `source`
+ * Wires loopwarden snapshots into prom-client gauges, labeled by `source`
  * so Grafana can break down lag per worker/controller/service.
  *
  * Requires `prom-client` as a peer dependency — not bundled.

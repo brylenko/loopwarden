@@ -31,7 +31,7 @@ var PinoReporter = class {
   onLog = (snapshot) => {
     this.#logger.info(
       { source: snapshot.source, p50: snapshot.p50, p95: snapshot.p95, p99: snapshot.p99, max: snapshot.max },
-      `[loop-guard] ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`
+      `[loopwarden] ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`
     );
   };
   onThreshold = (snapshot, level) => {
@@ -43,7 +43,7 @@ var PinoReporter = class {
       max: snapshot.max,
       ...snapshot.traceId !== void 0 ? { traceId: snapshot.traceId } : {}
     };
-    const msg = `[loop-guard] ${level.toUpperCase()} ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`;
+    const msg = `[loopwarden] ${level.toUpperCase()} ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`;
     if (level === "critical") {
       this.#logger.error(data, msg);
     } else {
@@ -53,7 +53,7 @@ var PinoReporter = class {
   onRecover = (snapshot, level) => {
     this.#logger.info(
       { source: snapshot.source, alertLevel: level, p99: snapshot.p99.toFixed(1) },
-      `[loop-guard] recovered from ${level} on ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`
+      `[loopwarden] recovered from ${level} on ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`
     );
   };
 };
