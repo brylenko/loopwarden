@@ -11,13 +11,16 @@ percentile-based, debounced two-level alerts, worker_thread support, and
 pluggable exporters (Prometheus, Sentry, OpenTelemetry, Pino). Zero mandatory
 dependencies; exporters are optional peer deps loaded only if you use them.
 
-## Why not toobusy-js / event-loop-lag?
+## How it compares
 
-Those libraries poll the event loop with `setInterval` and expose a single
-lag number. `loopwarden` uses Node's native histogram API instead (lower
-overhead, no self-induced polling noise), exposes p50/p95/p99/max instead of
-one number, ships with TypeScript types and dual ESM/CJS output, and has
-first-class worker_thread support so you can tell *which* thread degraded.
+| Package | Mechanism | Metrics | Worker threads | TypeScript | Last release |
+|---|---|---|---|---|---|
+| **loopwarden** | native `perf_hooks.monitorEventLoopDelay` | p50/p95/p99/max | ✅ | ✅ | 2026 |
+| event-loop-delay | native `perf_hooks.monitorEventLoopDelay` | single value | ❌ | ❌ | 2025 |
+| toobusy-js | `setInterval` polling | single value | ❌ | ❌ | 2019 |
+| event-loop-lag | `setInterval` polling | single value | ❌ | ❌ | 2021 |
+
+`event-loop-delay` uses the same native API — but exposes a single sampled value with no percentiles, no alerts, no worker_thread support, and no TypeScript types. `loopwarden` is the full-featured version of that idea.
 
 ## Install
 
