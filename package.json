@@ -1,0 +1,98 @@
+{
+  "name": "loop-guard",
+  "version": "0.1.0",
+  "description": "Native event-loop lag monitoring for Node.js with percentile-based metrics, debounced two-level alerts, worker_thread support, and pluggable exporters (Prometheus, Sentry, OpenTelemetry, Pino).",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./worker": {
+      "types": "./dist/worker.d.ts",
+      "import": "./dist/worker.js",
+      "require": "./dist/worker.cjs"
+    },
+    "./prometheus": {
+      "types": "./dist/reactors/prometheus.d.ts",
+      "import": "./dist/reactors/prometheus.js",
+      "require": "./dist/reactors/prometheus.cjs"
+    },
+    "./sentry": {
+      "types": "./dist/reactors/sentry.d.ts",
+      "import": "./dist/reactors/sentry.js",
+      "require": "./dist/reactors/sentry.cjs"
+    },
+    "./otel": {
+      "types": "./dist/reactors/otel.d.ts",
+      "import": "./dist/reactors/otel.js",
+      "require": "./dist/reactors/otel.cjs"
+    },
+    "./pino": {
+      "types": "./dist/reactors/pino.d.ts",
+      "import": "./dist/reactors/pino.js",
+      "require": "./dist/reactors/pino.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "event-loop",
+    "event-loop-lag",
+    "performance",
+    "monitoring",
+    "prometheus",
+    "sentry",
+    "opentelemetry",
+    "pino",
+    "worker-threads"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@opentelemetry/api": "^1",
+    "@sentry/node": "^8 || ^9 || ^10",
+    "pino": "^9 || ^10",
+    "prom-client": "^15"
+  },
+  "peerDependenciesMeta": {
+    "prom-client": {
+      "optional": true
+    },
+    "@sentry/node": {
+      "optional": true
+    },
+    "@opentelemetry/api": {
+      "optional": true
+    },
+    "pino": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@opentelemetry/api": "^1.9.1",
+    "@sentry/node": "^10.70.0",
+    "@types/node": "^18.19.130",
+    "knip": "^6.32.2",
+    "pino": "^10.3.1",
+    "prom-client": "^15.1.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node --test dist-test/",
+    "pretest": "tsc -p tsconfig.test.json",
+    "prepublishOnly": "npm run build"
+  }
+}
