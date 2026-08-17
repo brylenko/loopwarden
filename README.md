@@ -15,10 +15,10 @@ dependencies; exporters are optional peer deps loaded only if you use them.
 
 toobusy-js, event-loop-lag, and loopbench poll the event loop with
 `setInterval` and expose a single lag number — no percentiles, no TS types,
-last published years ago. event-loop-delay (mafintosh) is more modern and
-also uses the native histogram API, but exposes only an accumulated delay
-counter, not percentiles, and has no debounced alerting, worker_thread
-support, or exporters.
+last published years ago. event-loop-delay (mafintosh) is more modern and also uses the native
+histogram API, but it is a low-level primitive: one accumulated delay
+counter, no percentiles, no alerting, no worker_thread support, no
+exporters — you build everything on top yourself.
 
 `loopwarden` uses the same native histogram API, but adds what all of the
 above are missing: p50/p95/p99/max percentiles instead of one number,
