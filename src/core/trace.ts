@@ -41,3 +41,14 @@ export function withTraceId<T>(traceId: string, label: string | undefined, fn: (
 export function getCurrentTrace(): TraceContext | undefined {
   return als.getStore();
 }
+
+/**
+ * Manually registers a traceId into all active watcher registries.
+ * Returns a cleanup function that removes it from all registries.
+ * Use when withTraceId's Promise-based auto-cleanup doesn't match
+ * the actual async lifecycle (e.g. Express/Fastify middleware pattern).
+ */
+export function _addTraceToRegistries(traceId: string): () => void {
+  for (const set of registries) set.add(traceId);
+  return () => { for (const set of registries) set.delete(traceId); };
+}

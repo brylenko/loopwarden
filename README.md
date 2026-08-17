@@ -128,6 +128,85 @@ watchEventLoop({
 and `onRecover` at `info`. All calls include the full snapshot as structured
 fields alongside the message.
 
+### Express
+
+```ts
+import express from 'express';
+import { watchEventLoop } from 'loopwarden';
+import { OverloadState, traceMiddleware, sheddingMiddleware } from 'loopwarden/express';
+
+const app = express();
+const state = new OverloadState();
+
+// Wrap every request in a trace context (reads x-request-id or generates a UUID)
+app.use(traceMiddleware({ label: 'api' }));
+
+// Return 503 immediately while the loop is overloaded
+app.use(sheddingMiddleware({ state, message: 'Service temporarily unavailable' }));
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: (snap) => console.log(snap),
+  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
+  onRecover: () => state.setOverloaded(false),
+});
+```
+
+### Fastify
+
+```ts
+import Fastify from 'fastify';
+import { watchEventLoop } from 'loopwarden';
+import { OverloadState, loopwardenPlugin } from 'loopwarden/fastify';
+
+const fastify = Fastify();
+const state = new OverloadState();
+
+await fastify.register(loopwardenPlugin, {
+  header: 'x-request-id',
+  label: 'api',
+  shedding: { state, message: 'Service temporarily unavailable' },
+});
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: (snap) => fastify.log.info(snap, 'event-loop tick'),
+  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
+  onRecover: () => state.setOverloaded(false),
+});
+```
+
+### NestJS
+
+No decorators required — wire up with factory functions:
+
+```ts
+// main.ts / app.module.ts
+import { NestFactory } from '@nestjs/core';
+import { watchEventLoop } from 'loopwarden';
+import { createTraceMiddleware, createLoopwardenService, OverloadState } from 'loopwarden/nestjs';
+
+// 1. Start the event-loop watcher as a lifecycle-aware service
+const state = new OverloadState();
+const loopService = createLoopwardenService({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: (snap) => console.log('[loop]', snap.p99),
+  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
+  onRecover: () => state.setOverloaded(false),
+});
+
+loopService.onModuleInit();   // or call inside AppModule.onModuleInit()
+
+// 2. Apply trace middleware in your module's configure() method
+// app.module.ts:
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(createTraceMiddleware({ label: 'api' })).forRoutes('*');
+//   }
+```
+
 ## Request correlation
 
 ```ts

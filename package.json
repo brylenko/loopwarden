@@ -1,6 +1,6 @@
 {
   "name": "loopwarden",
-  "version": "1.1.2",
+  "version": "1.2.2",
   "description": "Native Node.js event-loop lag monitoring with percentile histograms, debounced two-level alerts, worker_thread support, and pluggable exporters (Prometheus, Sentry, OpenTelemetry).",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -36,6 +36,21 @@
       "types": "./dist/reactors/pino.d.ts",
       "import": "./dist/reactors/pino.js",
       "require": "./dist/reactors/pino.cjs"
+    },
+    "./express": {
+      "types": "./dist/integrations/express.d.ts",
+      "import": "./dist/integrations/express.js",
+      "require": "./dist/integrations/express.cjs"
+    },
+    "./fastify": {
+      "types": "./dist/integrations/fastify.d.ts",
+      "import": "./dist/integrations/fastify.js",
+      "require": "./dist/integrations/fastify.cjs"
+    },
+    "./nestjs": {
+      "types": "./dist/integrations/nestjs.d.ts",
+      "import": "./dist/integrations/nestjs.js",
+      "require": "./dist/integrations/nestjs.cjs"
     }
   },
   "files": [
@@ -59,12 +74,22 @@
   ],
   "license": "MIT",
   "peerDependencies": {
+    "@nestjs/common": ">=10",
+    "@nestjs/core": ">=10",
     "@opentelemetry/api": "^1",
     "@sentry/node": "^8 || ^9 || ^10",
+    "express": ">=4",
+    "fastify": ">=4",
     "pino": "^9 || ^10",
     "prom-client": "^15"
   },
   "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
+    "@nestjs/core": {
+      "optional": true
+    },
     "prom-client": {
       "optional": true
     },
@@ -74,6 +99,12 @@
     "@opentelemetry/api": {
       "optional": true
     },
+    "express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    },
     "pino": {
       "optional": true
     }
@@ -81,6 +112,7 @@
   "devDependencies": {
     "@opentelemetry/api": "^1.9.1",
     "@sentry/node": "^10.70.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^18.19.130",
     "knip": "^6.32.2",
     "pino": "^10.3.1",
