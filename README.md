@@ -20,10 +20,12 @@ also uses the native histogram API, but exposes only an accumulated delay
 counter, not percentiles, and has no debounced alerting, worker_thread
 support, or exporters.
 
-`loopwarden` uses Node's native histogram API (lower overhead, no
-self-induced polling noise), exposes p50/p95/p99/max instead of one number,
-ships with TypeScript types and dual ESM/CJS output, and has first-class
-worker_thread support so you can tell *which* thread degraded.
+`loopwarden` uses the same native histogram API, but adds what all of the
+above are missing: p50/p95/p99/max percentiles instead of one number,
+two-level warn/critical alerts with independent debounce and recovery
+notifications, first-class worker_thread support so you can tell *which*
+thread degraded, and drop-in exporters for Prometheus, Sentry, OpenTelemetry,
+and Pino. Ships with TypeScript types and dual ESM/CJS output.
 
 ## Install
 
@@ -128,13 +130,15 @@ fields alongside the message.
 ## Request correlation
 
 ```ts
-import { withTraceId, getCurrentTrace } from 'loopwarden';
+import { withTraceId } from 'loopwarden';
 
 app.use((req, res, next) => withTraceId(req.id, 'http-controller', () => next()));
 ```
 
-Every `LoopSnapshot` includes `traceId` when the sample was taken inside a
-`withTraceId` context. This uses `AsyncLocalStorage` (no legacy async_hooks callbacks), so overhead is negligible.
+Every `LoopSnapshot` includes `traceIds: string[]` — all requests that were
+active during that sampling interval. No extra setup needed beyond wrapping
+your request handler with `withTraceId`. Uses `AsyncLocalStorage` (no legacy
+async_hooks callbacks), so overhead is negligible.
 
 ## Two-level alerts with debounce
 

@@ -164,16 +164,16 @@ describe('PinoReporter.onThreshold', () => {
     assert.ok(calls[1]!.msg.includes('CRITICAL'));
   });
 
-  it('includes traceId in structured data when present', () => {
+  it('includes traceIds in structured data when present', () => {
     const { logger, calls } = makePinoSpy();
-    new PinoReporter({ logger }).onThreshold(makeSnap({ traceId: 'abc-123' }), 'warn');
-    assert.strictEqual(calls[0]?.obj['traceId'], 'abc-123');
+    new PinoReporter({ logger }).onThreshold(makeSnap({ traceIds: ['abc-123', 'def-456'] }), 'warn');
+    assert.deepStrictEqual(calls[0]?.obj['traceIds'], ['abc-123', 'def-456']);
   });
 
-  it('does not include traceId key when absent', () => {
+  it('does not include traceIds key when absent', () => {
     const { logger, calls } = makePinoSpy();
     new PinoReporter({ logger }).onThreshold(makeSnap(), 'warn');
-    assert.ok(!('traceId' in (calls[0]!.obj)));
+    assert.ok(!('traceIds' in (calls[0]!.obj)));
   });
 });
 

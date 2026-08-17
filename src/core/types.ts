@@ -14,7 +14,8 @@ export interface LoopSnapshot {
     heapUsed: number;
     heapTotal: number;
   };
-  traceId?: string;
+  /** All trace IDs active during this sampling interval. */
+  traceIds?: string[];
   /** Synchronous stack captured at the moment of an alert. Cheap, always available. */
   stack?: string;
 }
