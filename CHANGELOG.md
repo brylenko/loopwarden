@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-08-18
+
+### Fixed
+- **Fastify integration: `getCurrentTrace()` returned `undefined` in route handlers.** Root cause: Fastify's `fastify.register()` creates an encapsulated async child scope. Hooks registered inside a plugin's callback via `als.run(ctx, hookDone)` set ALS context in that child scope, but route handlers registered in the parent (root) scope run in a different async lineage and do not inherit that context. Fix: `loopwardenPlugin` now sets `[Symbol.for('skip-override')] = true` — the same mechanism `fastify-plugin` uses — so Fastify registers hooks directly on the root instance, eliminating the scope boundary. ALS context now propagates correctly both before and after any `await` in route handlers.
+- **Fastify integration: ordering bug where `_addTraceToRegistries` was called before `withTraceId` completed.** `withTraceId` calls `remove()` synchronously when its callback returns non-Promise (which `hookDone()` does), wiping the traceId from all watcher registries. `_addTraceToRegistries` is now called after `withTraceId` returns to re-insert the traceId for the duration of the request.
+- **Fastify integration: traceIds leaked when client disconnected before response.** `onResponse` does not fire on client abort. Added `onRequestAbort` hook (Fastify ≥ 4.8) to ensure cleanup runs when the client closes the connection mid-request.
+- `_addTraceToRegistries` is now exported from `loopwarden/fastify` for consistency with `loopwarden/express`.
+
+### Added
+- Regression test suite for Fastify ALS propagation: verifies `getCurrentTrace()` before and after `await`, `LoopSnapshot.traceIds` capture during in-flight requests, post-response cleanup, and abort cleanup (`onRequestAbort`).
+
 ## [1.2.2] - 2026-08-18
 
 ### Fixed
@@ -81,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `node:test` test suite (57 tests across trace, watch, reactors, worker)
 - MIT license
 
-[Unreleased]: https://github.com/brylenko/loopwarden/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/brylenko/loopwarden/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/brylenko/loopwarden/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/brylenko/loopwarden/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/brylenko/loopwarden/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/brylenko/loopwarden/compare/v1.1.2...v1.2.0

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { withTraceId, getCurrentTrace, _addTraceToRegistries } from '../core/trace.js';
 import { OverloadState } from './shared.js';
 
-export { OverloadState, getCurrentTrace };
+export { OverloadState, getCurrentTrace, _addTraceToRegistries };
 
 // Structural duck-typed interfaces — we do NOT import from 'fastify' or 'fastify-plugin'.
 // This keeps the bundle free of any fastify dependency at runtime.
@@ -31,6 +31,11 @@ interface FastifyInstance {
     name: 'onResponse',
     hook: (request: FastifyRequest, reply: FastifyReply, done: HookDoneCallback) => void,
   ): void;
+  /** Fired when the client disconnects before a response is sent (Fastify ≥ 4.8). */
+  addHook(
+    name: 'onRequestAbort',
+    hook: (request: FastifyRequest, done: HookDoneCallback) => void,
+  ): void;
 }
 
 type PluginDoneCallback = (err?: Error) => void;
@@ -56,6 +61,11 @@ export interface LoopwardenFastifyOptions {
  *
  * Does not depend on `fastify-plugin` — register with `fastify.register()` as usual.
  *
+ * IMPORTANT: This plugin sets `[Symbol.for('skip-override')] = true` on itself so that
+ * hooks are registered on the root Fastify instance rather than an encapsulated child
+ * scope. Without this, Fastify's plugin encapsulation creates an async boundary that
+ * prevents AsyncLocalStorage context from propagating to routes in the parent scope.
+ *
  * @example
  * await fastify.register(loopwardenPlugin, {
  *   header: 'x-request-id',
@@ -75,19 +85,34 @@ export function loopwardenPlugin(
     const raw = request.headers[header];
     const id = (Array.isArray(raw) ? raw[0] : raw) ?? randomUUID();
 
-    // ALS context propagation — getCurrentTrace() works throughout the async chain.
-    // NOTE: withTraceId's internal remove() fires immediately when hookDone() returns
-    // synchronously (result instanceof Promise === false), so we re-add the traceId
-    // to all registries after withTraceId finishes.
+    // ALS context propagation — withTraceId runs als.run(ctx, () => hookDone()).
+    // Because this plugin sets skip-override (root scope), the ALS context set here
+    // propagates to all route handlers, both before and after any await.
+    //
+    // withTraceId also adds id to registries, then calls remove() synchronously
+    // when hookDone() returns (not a Promise). We re-add below so the traceId
+    // remains in watcher registries for the lifetime of the request.
     withTraceId(id, label, () => hookDone());
 
-    // Register in watcher registries for the duration of the request lifecycle.
-    // This must come AFTER withTraceId so we re-add after withTraceId's remove() fires.
+    // Re-register in watcher registries AFTER withTraceId's own remove() has fired.
+    // withTraceId sees hookDone() return synchronously and immediately calls remove(),
+    // so we must call _addTraceToRegistries here to re-insert the traceId.
     const removeFromRegistries = _addTraceToRegistries(id);
-    (request as unknown as Record<string, unknown>).__lwCleanup = removeFromRegistries;
+    let cleaned = false;
+    const cleanup = (): void => { if (!cleaned) { cleaned = true; removeFromRegistries(); } };
+    (request as unknown as Record<string, unknown>).__lwCleanup = cleanup;
   });
 
   fastify.addHook('onResponse', (request, _reply, hookDone) => {
+    const cleanup = (request as unknown as Record<string, unknown>).__lwCleanup;
+    if (typeof cleanup === 'function') (cleanup as () => void)();
+    hookDone();
+  });
+
+  // Handle client disconnects: onRequestAbort fires when the client closes the
+  // connection before a response is sent, which means onResponse won't fire.
+  // Available in Fastify ≥ 4.8 — always present in our >=4 peer range.
+  fastify.addHook('onRequestAbort', (request, hookDone) => {
     const cleanup = (request as unknown as Record<string, unknown>).__lwCleanup;
     if (typeof cleanup === 'function') (cleanup as () => void)();
     hookDone();
@@ -107,3 +132,9 @@ export function loopwardenPlugin(
 
   done();
 }
+
+// Skip Fastify's plugin encapsulation so hooks are registered on the root instance.
+// This is the same mechanism fastify-plugin uses, but without the dependency.
+// Without this, Fastify's async child scope breaks AsyncLocalStorage propagation
+// from onRequest hooks into route handlers registered in the parent scope.
+(loopwardenPlugin as unknown as Record<string | symbol, unknown>)[Symbol.for('skip-override')] = true;
