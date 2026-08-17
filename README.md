@@ -140,6 +140,40 @@ active during that sampling interval. No extra setup needed beyond wrapping
 your request handler with `withTraceId`. Uses `AsyncLocalStorage` (no legacy
 async_hooks callbacks), so overhead is negligible.
 
+## Diagnosing a spike
+
+When `onThreshold` fires you already have percentiles, active trace IDs, and
+memory in the snapshot. Combine them with V8 heap stats for a full picture
+without any extra dependencies:
+
+```ts
+import v8 from 'node:v8';
+import { watchEventLoop } from 'loopwarden';
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: (snap) => logger.info(snap, 'event-loop tick'),
+  onThreshold: (snap, level) => {
+    const heap = v8.getHeapStatistics();
+    logger.warn({
+      level,
+      p99: snap.p99,
+      max: snap.max,
+      traceIds: snap.traceIds,          // which requests were active
+      memory: snap.memory,              // rss / heapUsed / heapTotal
+      heapSizeLimit: heap.heap_size_limit,
+      externalMB: (heap.external_memory / 1024 / 1024).toFixed(1),
+      stack: snap.stack,                // sync stack at breach moment
+    }, `[loopwarden] ${level} spike`);
+  },
+});
+```
+
+`snap.traceIds` lists every request ID that was inside a `withTraceId` context
+during the sampling interval — cross-reference against your access log to find
+the culprit.
+
 ## Two-level alerts with debounce
 
 ```ts
