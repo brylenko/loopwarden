@@ -24,11 +24,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Type check
-        run: npx tsc --noEmit -p tsconfig.json
-
       - name: Build
         run: npm run build
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.json
 
       - name: Test suite
         run: npm test
