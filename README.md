@@ -1,8 +1,8 @@
 # loopwarden
 
-[![npm](https://img.shields.io/npm/v/loopwarden)](https://www.npmjs.com/package/loopwarden)
-[![license](https://img.shields.io/npm/l/loopwarden)](LICENSE)
-[![node](https://img.shields.io/node/v/loopwarden)](package.json)
+[![npm](https://img.shields.io/badge/npm-v0.1.0-red)](https://www.npmjs.com/package/loopwarden)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](package.json)
 [![types](https://img.shields.io/badge/types-TypeScript-blue)](src/core/types.ts)
 
 Native Node.js event-loop lag monitoring using `perf_hooks.monitorEventLoopDelay` —
