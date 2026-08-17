@@ -4,6 +4,12 @@ import { Worker } from 'node:worker_threads';
 import { reportEventLoopToParent, pipeFromWorker } from '../worker.js';
 import type { AlertLevel, LoopSnapshot } from '../core/types.js';
 
+// data: URL is the only reliable way to run ESM eval workers cross-platform
+// (eval:true + --input-type=module does not work on Node 18 CI runners)
+function esmWorker(code: string): Worker {
+  return new Worker(new URL(`data:text/javascript,${encodeURIComponent(code)}`));
+}
+
 describe('reportEventLoopToParent', () => {
   it('throws when called outside a worker thread', () => {
     assert.throws(
@@ -15,14 +21,12 @@ describe('reportEventLoopToParent', () => {
 
 describe('pipeFromWorker', () => {
   it('receives onLog messages from a worker and returns a cleanup fn', async () => {
-    // Inline worker script that calls reportEventLoopToParent, waits one tick, then exits.
-    const workerCode = `
-      import { reportEventLoopToParent } from ${JSON.stringify(new URL('../worker.js', import.meta.url).href)};
+    const workerUrl = JSON.stringify(new URL('../worker.js', import.meta.url).href);
+    const worker = esmWorker(`
+      import { reportEventLoopToParent } from ${workerUrl};
       const handle = reportEventLoopToParent({ source: 'w-test', intervalMs: 30 });
       setTimeout(() => { handle.stop(); }, 80);
-    `;
-
-    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
+    `);
     const snapshots: LoopSnapshot[] = [];
 
     const unlisten = pipeFromWorker(worker, {
@@ -42,16 +46,14 @@ describe('pipeFromWorker', () => {
   });
 
   it('ignores messages from unrelated protocols', async () => {
-    // Worker that sends an unrelated message first, then a real loopwarden one.
-    const workerCode = `
+    const workerUrl = JSON.stringify(new URL('../worker.js', import.meta.url).href);
+    const worker = esmWorker(`
       import { parentPort } from 'node:worker_threads';
-      import { reportEventLoopToParent } from ${JSON.stringify(new URL('../worker.js', import.meta.url).href)};
+      import { reportEventLoopToParent } from ${workerUrl};
       parentPort.postMessage({ channel: 'something-else', data: 42 });
       const handle = reportEventLoopToParent({ source: 'filter-test', intervalMs: 30 });
       setTimeout(() => { handle.stop(); }, 80);
-    `;
-
-    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
+    `);
     const snapshots: LoopSnapshot[] = [];
     const rawMessages: unknown[] = [];
 
@@ -64,18 +66,16 @@ describe('pipeFromWorker', () => {
     });
 
     assert.ok(rawMessages.length >= 2, 'expected at least 2 raw messages');
-    // Only loopwarden messages should reach onLog
     assert.ok(snapshots.every((s) => s.source === 'filter-test'));
   });
 
   it('onThreshold and onRecover callbacks are wired through', async () => {
-    const workerCode = `
-      import { reportEventLoopToParent } from ${JSON.stringify(new URL('../worker.js', import.meta.url).href)};
+    const workerUrl = JSON.stringify(new URL('../worker.js', import.meta.url).href);
+    const worker = esmWorker(`
+      import { reportEventLoopToParent } from ${workerUrl};
       const handle = reportEventLoopToParent({ source: 'thresh-test', intervalMs: 30, warn: { ms: 0 } });
       setTimeout(() => { handle.stop(); }, 100);
-    `;
-
-    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
+    `);
     const thresholds: Array<[LoopSnapshot, AlertLevel]> = [];
 
     pipeFromWorker(worker, {
