@@ -22,7 +22,7 @@ describe('pipeFromWorker', () => {
       setTimeout(() => { handle.stop(); }, 80);
     `;
 
-    const worker = new Worker(workerCode, { eval: true });
+    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
     const snapshots: LoopSnapshot[] = [];
 
     const unlisten = pipeFromWorker(worker, {
@@ -51,7 +51,7 @@ describe('pipeFromWorker', () => {
       setTimeout(() => { handle.stop(); }, 80);
     `;
 
-    const worker = new Worker(workerCode, { eval: true });
+    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
     const snapshots: LoopSnapshot[] = [];
     const rawMessages: unknown[] = [];
 
@@ -75,7 +75,7 @@ describe('pipeFromWorker', () => {
       setTimeout(() => { handle.stop(); }, 100);
     `;
 
-    const worker = new Worker(workerCode, { eval: true });
+    const worker = new Worker(workerCode, { eval: true, execArgv: ['--input-type=module'] });
     const thresholds: Array<[LoopSnapshot, AlertLevel]> = [];
 
     pipeFromWorker(worker, {
