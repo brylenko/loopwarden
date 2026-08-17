@@ -39,4 +39,5 @@ jobs:
           node smoke-test-core.mjs
 
       - name: Knip (dead code)
+        if: matrix.node-version == '20.x'
         run: npx knip
