@@ -38,7 +38,7 @@ export class SentryReporter {
       level: level === 'critical' ? 'error' : 'warning',
       message: `[${snapshot.source}] ${level} threshold breached: p99=${snapshot.p99.toFixed(1)}ms`,
       data: {
-        traceId: snapshot.traceId,
+        traceIds: snapshot.traceIds,
       },
     });
 

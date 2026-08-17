@@ -37,7 +37,7 @@ export class PinoReporter {
       p95: snapshot.p95,
       p99: snapshot.p99,
       max: snapshot.max,
-      ...(snapshot.traceId !== undefined ? { traceId: snapshot.traceId } : {}),
+      ...(snapshot.traceIds !== undefined ? { traceIds: snapshot.traceIds } : {}),
     };
     const msg = `[loopwarden] ${level.toUpperCase()} ${snapshot.source} p99=${snapshot.p99.toFixed(1)}ms`;
     if (level === 'critical') {

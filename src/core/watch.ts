@@ -1,5 +1,5 @@
 import { monitorEventLoopDelay, type IntervalHistogram } from 'node:perf_hooks';
-import { getCurrentTrace } from './trace.js';
+import { _registerTraceRegistry } from './trace.js';
 import type { AlertLevel, LagMetric, LoopSnapshot } from './types.js';
 
 export interface AlertThreshold {
@@ -56,6 +56,9 @@ export function watchEventLoop(opts: WatchOptions): WatchHandle {
   if (opts.warn) levels.warn = { breached: false, lastFiredAt: 0 };
   if (opts.critical) levels.critical = { breached: false, lastFiredAt: 0 };
 
+  const activeTraces = new Set<string>();
+  const unregisterTraces = _registerTraceRegistry(activeTraces);
+
   const timer = setInterval(() => {
     const snapshot: LoopSnapshot = {
       source,
@@ -72,8 +75,9 @@ export function watchEventLoop(opts: WatchOptions): WatchHandle {
       snapshot.memory = { rss: mem.rss, heapUsed: mem.heapUsed, heapTotal: mem.heapTotal };
     }
 
-    const trace = getCurrentTrace();
-    if (trace?.traceId !== undefined) snapshot.traceId = trace.traceId;
+    if (activeTraces.size > 0) {
+      snapshot.traceIds = [...activeTraces];
+    }
 
     opts.onLog(snapshot);
 
@@ -112,6 +116,7 @@ export function watchEventLoop(opts: WatchOptions): WatchHandle {
     stop: () => {
       clearInterval(timer);
       histogram.disable();
+      unregisterTraces();
     },
   };
 }
