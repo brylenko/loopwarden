@@ -1,6 +1,6 @@
 # loopwarden
 
-[![npm](https://img.shields.io/badge/npm-v0.1.0-red)](https://www.npmjs.com/package/loopwarden)
+[![npm](https://img.shields.io/badge/npm-v1.0.0-red)](https://www.npmjs.com/package/loopwarden)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](package.json)
 [![types](https://img.shields.io/badge/types-TypeScript-blue)](src/core/types.ts)
