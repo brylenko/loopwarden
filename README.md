@@ -1,5 +1,6 @@
 # loopwarden
 
+[![CI](https://github.com/brylenko/loopwarden/actions/workflows/ci.yml/badge.svg)](https://github.com/brylenko/loopwarden/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/loopwarden)](https://www.npmjs.com/package/loopwarden)
 [![license](https://img.shields.io/npm/l/loopwarden)](LICENSE)
 [![node](https://img.shields.io/node/v/loopwarden)](package.json)
