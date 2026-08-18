@@ -98,8 +98,8 @@ export function watchEventLoop(opts: WatchOptions): WatchHandle {
 
           const alertSnapshot: LoopSnapshot = { ...snapshot };
           if (captureStack) {
-            const stack = new Error(`loopwarden: ${level} threshold breached`).stack;
-            if (stack !== undefined) alertSnapshot.stack = stack;
+            const stack = new Error().stack;
+            if (stack !== undefined) alertSnapshot.stack = stack.split('\n').slice(1).join('\n');
           }
 
           opts.onThreshold?.(alertSnapshot, level);
