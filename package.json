@@ -112,7 +112,6 @@
   "devDependencies": {
     "@opentelemetry/api": "^1.9.1",
     "@sentry/node": "^10.70.0",
-    "@types/express": "^5.0.6",
     "@types/node": "^18.19.130",
     "fastify": "^5.12.0",
     "knip": "^6.32.2",
