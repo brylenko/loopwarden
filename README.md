@@ -95,17 +95,116 @@ Output looks like:
 
 ## Exporters
 
-```ts
-import { PrometheusReporter } from 'loopwarden/prometheus';
-import { SentryReporter } from 'loopwarden/sentry';
-import { OtelReporter } from 'loopwarden/otel';
-import { PinoReporter } from 'loopwarden/pino';
+Each exporter requires its corresponding peer dependency — install only what you use:
+
+| Exporter | Peer dep | Use when |
+|---|---|---|
+| `loopwarden/prometheus` | `prom-client` | Prometheus scrape → Grafana |
+| `loopwarden/otel` | `@opentelemetry/api` | OTel pipeline → Grafana Cloud / Tempo / Mimir |
+| `loopwarden/sentry` | `@sentry/node` | Sentry alerts |
+| `loopwarden/pino` | `pino` | Structured JSON logs |
+
+### Prometheus + Grafana
+
+```
+npm install prom-client
 ```
 
-Each requires its corresponding peer dependency (`prom-client`,
-`@sentry/node`, `@opentelemetry/api`, `pino`) — install only what you use.
+```ts
+import express from 'express';
+import { Registry } from 'prom-client';
+import { watchEventLoop } from 'loopwarden';
+import { PrometheusReporter } from 'loopwarden/prometheus';
+
+const registry = new Registry();
+const reporter = new PrometheusReporter({ registry, prefix: 'nodejs_event_loop' });
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: reporter.onLog,
+  onThreshold: reporter.onThreshold,
+  onRecover: reporter.onRecover,
+});
+
+// Expose /metrics for Grafana to scrape
+const app = express();
+app.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', registry.contentType);
+  res.send(await registry.metrics());
+});
+```
+
+This exposes two gauge families that you can graph in Grafana:
+
+| Metric | Labels | Description |
+|---|---|---|
+| `nodejs_event_loop_lag_ms` | `source`, `percentile` | Lag by percentile (p50/p95/p99/max) |
+| `nodejs_event_loop_alert` | `source`, `level` | 1 while threshold is breached, 0 otherwise |
+
+In Grafana, point a Prometheus data source at your `/metrics` endpoint and use queries like:
+```promql
+nodejs_event_loop_lag_ms{percentile="p99"}
+```
+
+### OpenTelemetry → Grafana Cloud / Tempo / Mimir
+
+```
+npm install @opentelemetry/api
+```
+
+```ts
+import { watchEventLoop } from 'loopwarden';
+import { OtelReporter } from 'loopwarden/otel';
+
+// OTel SDK must be initialized before this (NodeSDK, exporters, etc.)
+const reporter = new OtelReporter({ meterName: 'my-service' });
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: reporter.onLog,
+  onThreshold: reporter.onThreshold,
+  onRecover: reporter.onRecover,
+});
+```
+
+Records an `event_loop_lag_ms` histogram (labeled `source`, `percentile`) into whatever OTel pipeline you have configured — Grafana Cloud, Tempo, Mimir, or self-hosted Prometheus via the OTel Prometheus exporter.
+
+### Sentry
+
+```
+npm install @sentry/node
+```
+
+```ts
+import * as Sentry from '@sentry/node';
+import { watchEventLoop } from 'loopwarden';
+import { SentryReporter } from 'loopwarden/sentry';
+
+Sentry.init({ dsn: '...' });
+
+const reporter = new SentryReporter({
+  sentry: Sentry,
+  captureAtLevel: 'critical', // 'warn' only adds a breadcrumb; 'critical' calls captureMessage
+});
+
+watchEventLoop({
+  warn: { ms: 50 },
+  critical: { ms: 100 },
+  onLog: reporter.onLog,
+  onThreshold: reporter.onThreshold,
+  onRecover: reporter.onRecover,
+});
+```
+
+Every tick adds a breadcrumb (`category: 'event-loop'`) so you see lag history on any Sentry issue. When `level` reaches `captureAtLevel` (default `'critical'`), it calls `Sentry.captureMessage` so the spike appears as a standalone Sentry event.
 
 ### Pino
+
+```
+npm install pino
+```
 
 ```ts
 import pino from 'pino';
