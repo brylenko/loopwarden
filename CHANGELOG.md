@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-19
+
+### Added
+- `OverloadState.raise(level)` — sets overloaded only when `level` is a trigger level (`'critical'` by default). Eliminates bare `if (level === 'critical')` checks in `onThreshold` handlers.
+- `OverloadState.lower(level)` — clears overloaded only when `level` is a trigger level. Eliminates manual `state.setOverloaded(false)` in `onRecover` handlers.
+- README examples updated throughout (Express, Fastify, NestJS sections) to use `raise`/`lower`.
+- `setOverloaded(boolean)` unchanged — fully backward compatible.
+
 ## [1.2.4] - 2026-08-19
 
 ### Fixed

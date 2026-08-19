@@ -83,8 +83,8 @@ export interface SheddingMiddlewareOptions {
  *
  * watchEventLoop({
  *   onLog: () => {},
- *   onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
- *   onRecover: () => state.setOverloaded(false),
+ *   onThreshold: (_snap, level) => state.raise(level),
+ *   onRecover: (_snap, level) => state.lower(level),
  * });
  */
 export function sheddingMiddleware(options: SheddingMiddlewareOptions): Middleware {

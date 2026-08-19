@@ -148,8 +148,8 @@ watchEventLoop({
   warn: { ms: 50 },
   critical: { ms: 100 },
   onLog: (snap) => console.log(snap),
-  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
-  onRecover: () => state.setOverloaded(false),
+  onThreshold: (_snap, level) => state.raise(level),
+  onRecover: (_snap, level) => state.lower(level),
 });
 ```
 
@@ -173,8 +173,8 @@ watchEventLoop({
   warn: { ms: 50 },
   critical: { ms: 100 },
   onLog: (snap) => fastify.log.info(snap, 'event-loop tick'),
-  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
-  onRecover: () => state.setOverloaded(false),
+  onThreshold: (_snap, level) => state.raise(level),
+  onRecover: (_snap, level) => state.lower(level),
 });
 ```
 
@@ -194,8 +194,8 @@ const loopService = createLoopwardenService({
   warn: { ms: 50 },
   critical: { ms: 100 },
   onLog: (snap) => console.log('[loop]', snap.p99),
-  onThreshold: (_snap, level) => { if (level === 'critical') state.setOverloaded(true); },
-  onRecover: () => state.setOverloaded(false),
+  onThreshold: (_snap, level) => state.raise(level),
+  onRecover: (_snap, level) => state.lower(level),
 });
 
 loopService.onModuleInit();   // or call inside AppModule.onModuleInit()

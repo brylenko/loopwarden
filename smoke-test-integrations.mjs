@@ -278,6 +278,27 @@ console.log('\n--- Fastify: real server ALS + traceIds (1.2.3 regression) ---');
   await fastify.close();
 }
 
+// ---- 7. OverloadState: raise/lower -----------------------------------------
+console.log('\n--- OverloadState: raise/lower ---');
+
+{
+  const state = new OverloadState();
+  state.raise('warn');
+  assert('raise("warn") does NOT set overloaded', !state.isOverloaded);
+  state.raise('critical');
+  assert('raise("critical") DOES set overloaded', state.isOverloaded);
+  state.lower('warn');
+  assert('lower("warn") does NOT clear overloaded', state.isOverloaded);
+  state.lower('critical');
+  assert('lower("critical") clears overloaded', !state.isOverloaded);
+
+  // Verify setOverloaded still works as before
+  state.setOverloaded(true);
+  assert('setOverloaded(true) still works', state.isOverloaded);
+  state.setOverloaded(false);
+  assert('setOverloaded(false) still works', !state.isOverloaded);
+}
+
 // ---- summary ----------------------------------------------------------------
 console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
